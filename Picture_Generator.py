@@ -26,7 +26,7 @@ import random
 FILE_PATH = sys.argv[-1]
 
 #Modellinitialisierung
-model_path = "/mount/shared/Models/FLUX.1-schnell"
+model_path = "/mount/point/models/FLUX.1-schnell"
 model = FluxPipeline.from_pretrained(model_path,
                                     torch_dtype=torch.bfloat16,
                                     device_map = "balanced",
