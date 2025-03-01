@@ -1,4 +1,5 @@
 @echo off
+chcp 65001
 set /p USERNAME= "Enter your username: "
 echo '%USERNAME%'
 set REMOTE_DIR=/mount/point/%USERNAME%/generated_pictures/
