@@ -111,13 +111,19 @@ if __name__ == "__main__":
         customization = str(input())
         if customization.lower() in ["y", "yes", "ja", "ye"]:
             height, width = map(int, input("Please enter your desired picture dimensions for height and then width separated by ',': ").split(","))
-            image_num = 1 #Bilderanzahl ist nicht anpassbar
+            image_num = int( input("Please enter the number of images you wish to be generated (maximum of 4): ")) #Bilderanzahl ist nicht anpassbar
+            if image_num > 4:
+                image_num = min(image_num, 4)
             guidance_scale = float(input("Please enter the guidance scale as a positive float value: "))
             assert guidance_scale >= 0.0, "The guidance scale value must be 0.0 or above"
             file_suffix = suffix = datetime.datetime.now().strftime("%y%m%d_%H%M%S") #generieren des aktuellen Suffixes
             save_path = f"{FILE_PATH}/image_{file_suffix}.png" # f"/mount/point/veith/App_Picture_Generator/generated_images/image_{file_suffix}.png" #Speicherpfad (noch) nicht anpassbar #abspeichern als zufällige Zeichenfolgen
             num_inference_steps = int(input("Please enter the number of inference steps for the picture generation: "))
-            seed = int(input("Please enter the seed for the picture generation as an integer: "))
+            seed = input("Please enter the seed for the picture generation as an integer or write 'random' for a random seed: ")
+            if seed.lower() in ["random", "rand", "zufall"]:
+                seed = random.randrange(0, 9999, 1)
+            else:
+                seed = int(seed)
 
         else: #Angabe der default Parameter
             height = 1072
