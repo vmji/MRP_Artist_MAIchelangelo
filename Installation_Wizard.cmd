@@ -4,16 +4,8 @@ setlocal enabledelayedexpansion
 ::Prüfen der Adminrechte
 net session >nul 2>&1
 if %errorLevel% == 0 (
-    goto :install
+    goto :ask
 )
-
-::Frage ob Installation ausgeführt werden soll
-:ask
-echo "Do you want to install the required files to use MAIchelangelo? (Y/n)"
-set /p INSTALLATION=""
-::Falls nein, Abbruch des Skripts
-if /i "%INSTALLATION%"=="n" goto end
-if /i not "%INSTALLATION%"=="Y" goto end
 
 ::Abfrage Skript als Admin auszuführen
 echo Requesting administrative privileges...
@@ -22,6 +14,14 @@ echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
 "%temp%\getadmin.vbs"
 del "%temp%\getadmin.vbs"
 exit /b
+
+::Frage ob Installation ausgeführt werden soll
+:ask
+echo "Do you want to install the required files to use MAIchelangelo? (Y/n)"
+set /p INSTALLATION=""
+::Falls nein, Abbruch des Skripts
+if /i "%INSTALLATION%"=="n" goto end
+if /i not "%INSTALLATION%"=="Y" goto end
 
 :: Generierung des ssh keys falls noch nicht vorhanden
 
