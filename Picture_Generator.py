@@ -7,6 +7,7 @@ import sys
 from PIL import Image
 import datetime #benötigt zur Generierung von Suffixen für Speichern von Dateien
 import random
+import time
 #Quantisierung
 # from transformers import T5EncoderModel, BitsAndBytesConfig
 
@@ -97,6 +98,7 @@ def pic_gen(prompt, save_path = None, height = 1024, width = 1024,
    
     return image #return all the generated data
 
+time.sleep(2)
 model_name = model_path.split('/')[-1]
 print(f"Hello and welcome to the {model_name} image generator!")
 
