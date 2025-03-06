@@ -1,6 +1,12 @@
 @echo off 
 setlocal enabledelayedexpansion
 
+::Prüfen der Adminrechte
+net session >nul 2>&1
+if %errorLevel% == 0 (
+    goto :install
+)
+
 ::Frage ob Installation ausgeführt werden soll
 :ask
 echo "Do you want to install the required files to use MAIchelangelo? (Y/n)"
@@ -8,12 +14,6 @@ set /p INSTALLATION=""
 ::Falls nein, Abbruch des Skripts
 if /i "%INSTALLATION%"=="n" goto end
 if /i not "%INSTALLATION%"=="Y" goto end
-
-::Prüfen der Adminrechte
-net session >nul 2>&1
-if %errorLevel% == 0 (
-    goto :install
-)
 
 ::Abfrage Skript als Admin auszuführen
 echo Requesting administrative privileges...
