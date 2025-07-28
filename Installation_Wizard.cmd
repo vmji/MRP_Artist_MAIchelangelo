@@ -1,13 +1,13 @@
 @echo off 
 setlocal enabledelayedexpansion
 
-::Prüfen der Adminrechte
+::Pruefen der Adminrechte
 net session >nul 2>&1
 if %errorLevel% == 0 (
     goto :ask
 )
 
-::Abfrage Skript als Admin auszuführen
+::Abfrage Skript als Admin auszufuehren
 echo Requesting administrative privileges...
 echo Set UAC = CreateObject^("Shell.Application"^) > "%temp%\getadmin.vbs"
 echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
@@ -15,7 +15,7 @@ echo UAC.ShellExecute "%~s0", "", "", "runas", 1 >> "%temp%\getadmin.vbs"
 del "%temp%\getadmin.vbs"
 exit /b
 
-::Frage ob Installation ausgeführt werden soll
+::Frage ob Installation ausgefuehrt werden soll
 :ask
 echo "Do you want to install the required files to use MAIchelangelo? (Y/n)"
 set /p INSTALLATION=""
@@ -25,7 +25,7 @@ if /i not "%INSTALLATION%"=="Y" goto end
 
 :: Generierung des ssh keys falls noch nicht vorhanden
 
-::Ausführen der Installationsskripts, falls diese noch nicht ausgeführt wurden call wird verwendet, um Programme auszuführen und dann weiterzuführen
+::Ausfuehren der Installationsskripts, falls diese noch nicht ausgefuehrt wurden call wird verwendet, um Programme auszufuehren und dann weiterzufuehren
 :install
 set "SCRIPT_DIR=%~dp0"
 cd %SCRIPT_DIR%

@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Prüfen ob Desktopverbindung bereits existiert
+:: Pruefen ob Desktopverbindung bereits existiert
 if exist ".shortcut_created" (
     ::echo Shortcut already exists. Exiting.
     exit /b 0
