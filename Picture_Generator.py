@@ -91,10 +91,26 @@ else: # Fall, dass keine Bilder hochgeladen wurden, was nur die Nutzung von Bild
     print("Which image generation model do you want to use?")
     print("1.\tFLUX.1-schnell")
     print("2.\tstable-diffusion-3.5-medium")
+    print("3.\tFLUX.1-Krea-dev")
     model_question = int(input("Please answer by typing in the corresponding model number: "))
 
     if model_question == 1:
-        model_path = "/mount/points/models/FLUX.1-schnell"
+        model_path = "/mount/point/models/FLUX.1-schnell"
+        model = FluxPipeline.from_pretrained(model_path,
+                                            torch_dtype=torch.bfloat16, #torch.bfloat32
+                                            device_map = "balanced",
+                                            # max_memory={0: "16GB", 1: "16GB", 2: "16GB", 3: "16GB"} #max memory falls benötigt und andere GPUs in Nutzung
+                                            # text_encoder_2 = text_encoder
+                                            )
+    elif model_question == 2:
+        model_path = "/mount/point/models/stable-diffusion-3.5-medium"
+        model = StableDiffusion3Pipeline.from_pretrained(model_path,
+                                        torch_dtype=torch.bfloat16, #torch.bfloat32
+                                        device_map = "balanced",
+                                        )
+        
+    elif model_question == 3:
+        model_path = "/mount/point/models/FLUX.1-Krea-dev"
         model = FluxPipeline.from_pretrained(model_path,
                                             torch_dtype=torch.bfloat16, #torch.bfloat32
                                             device_map = "balanced",
