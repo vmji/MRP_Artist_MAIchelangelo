@@ -3,6 +3,12 @@ import gc #GPU Memory Optimierung
 from diffusers import FluxPipeline, AutoPipelineForText2Image, StableDiffusion3Pipeline, FluxKontextPipeline
 from diffusers import BitsAndBytesConfig, PipelineQuantizationConfig, SD3Transformer2DModel # Quantisierungsoption
 from diffusers.utils import load_image
+
+# manuelle Initialisierung der Modellkomponenten auf spezifische GPUs
+# from diffusers import FluxTransformer2DModel, AutoencoderKL
+# from diffusers import FlowMatchEulerDiscreteScheduler
+# from transformers import CLIPTextModel, CLIPTokenizer, T5EncoderModel, T5TokenizerFast
+
 # from accelerate import load_checkpoint_and_dispatch #manuelles verschieben Elemente auf GPU Geräte
 import os
 import sys
@@ -66,6 +72,7 @@ if len(os.listdir(INPUT_PATH)) > 0:
         print("Which image generation model do you want to use?")
         print("1.\tFLUX.1-schnell")
         print("2.\tstable-diffusion-3.5-medium")
+        print("3.\tFLUX.1-Krea-dev")
         model_question = int(input("Please answer by typing in the corresponding model number: "))
 
         model_question = int(input("Which image generation model do you want to use?\n1.\tFLUX.1-schnell\n2.\tstable-diffusion-3.5-medium\nPlease answer by typing in the corresponding model number: "))
@@ -75,6 +82,42 @@ if len(os.listdir(INPUT_PATH)) > 0:
             model = FluxPipeline.from_pretrained(model_path,
                                                 torch_dtype=torch.bfloat16, #torch.bfloat32
                                                 device_map = "balanced",
+                                                # max_memory={0: "16GB", 1: "16GB", 2: "16GB", 3: "16GB"} #max memory falls benötigt und andere GPUs in Nutzung
+                                                # text_encoder_2 = text_encoder
+                                                )
+        elif model_question == 2:
+            model_path = "/mount/point/models/stable-diffusion-3.5-medium"
+            model = StableDiffusion3Pipeline.from_pretrained(model_path,
+                                            torch_dtype=torch.bfloat16, #torch.bfloat32
+                                            device_map = "balanced",
+                                            )
+            
+        elif model_question == 3:
+            model_path = "/mount/point/models/FLUX.1-Krea-dev"
+            quantization_config_8bit = PipelineQuantizationConfig(
+                quant_backend="bitsandbytes_8bit",
+                quant_kwargs={
+                    "load_in_8bit": True,
+                    "llm_int8_threshold": 6.0,
+                    "llm_int8_has_fp16_weight": False,
+                },
+                components_to_quantize=["transformer"]  # Only quantize the transformer component
+            )
+            
+            quantization_config_4bit= PipelineQuantizationConfig(
+                quant_backend="bitsandbytes_4bit",
+                quant_kwargs={
+                    "load_in_4bit": True,
+                    "llm_int4_threshold": 6.0,
+                    "llm_int4_has_fp16_weight": False,
+                },
+                components_to_quantize=["transformer"]  # Only quantize the transformer component
+            )
+
+            model = FluxPipeline.from_pretrained(model_path,
+                                                torch_dtype=torch.bfloat16, #torch.bfloat32
+                                                device_map = "balanced",
+                                                quantization_config = quantization_config_8bit,
                                                 # max_memory={0: "16GB", 1: "16GB", 2: "16GB", 3: "16GB"} #max memory falls benötigt und andere GPUs in Nutzung
                                                 # text_encoder_2 = text_encoder
                                                 )
@@ -111,9 +154,45 @@ else: # Fall, dass keine Bilder hochgeladen wurden, was nur die Nutzung von Bild
         
     elif model_question == 3:
         model_path = "/mount/point/models/FLUX.1-Krea-dev"
+        # manuelles Laden der Modellkomponenten auf spezifische GPUs
+        # scheduler = FlowMatchEulerDiscreteScheduler.from_pretrained(model_path, subfolder="scheduler")
+        # text_encoder = CLIPTextModel.from_pretrained(model_path, subfolder="text_encoder", torch_dtype=torch.bfloat16).to("cuda:0")
+        # tokenizer = CLIPTokenizer.from_pretrained(model_path, subfolder="tokenizer")
+        # text_encoder_2 = T5EncoderModel.from_pretrained(model_path, subfolder="text_encoder_2", torch_dtype=torch.bfloat16).to("cuda:0")
+        # tokenizer_2 = T5TokenizerFast.from_pretrained(model_path, subfolder="tokenizer_2")
+        # transformer = FluxTransformer2DModel.from_pretrained(model_path, subfolder="transformer", torch_dtype=torch.bfloat16).to("cuda:1")
+        # vae = AutoencoderKL.from_pretrained(model_path, subfolder="vae", torch_dtype=torch.bfloat16).to("cuda:2")
+
+        quantization_config_8bit = PipelineQuantizationConfig(
+            quant_backend="bitsandbytes_8bit",
+            quant_kwargs={
+                "load_in_8bit": True,
+                "llm_int8_threshold": 6.0,
+                "llm_int8_has_fp16_weight": False,
+            },
+            components_to_quantize=["transformer"]  # Only quantize the transformer component
+            )
+        quantization_config_4bit= PipelineQuantizationConfig(
+                quant_backend="bitsandbytes_4bit",
+                quant_kwargs={
+                    "load_in_4bit": True,
+                    "llm_int4_threshold": 6.0,
+                    "llm_int4_has_fp16_weight": False,
+                },
+                components_to_quantize=["transformer"]  # Only quantize the transformer component
+            )
+
         model = FluxPipeline.from_pretrained(model_path,
                                             torch_dtype=torch.bfloat16, #torch.bfloat32
+                                            # scheduler=scheduler,
+                                            # text_encoder=text_encoder,
+                                            # tokenizer=tokenizer,
+                                            # text_encoder_2=text_encoder_2,
+                                            # tokenizer_2=tokenizer_2,
+                                            # transformer=transformer,
+                                            # vae=vae,
                                             device_map = "balanced",
+                                            quantization_config=quantization_config_8bit,
                                             # max_memory={0: "16GB", 1: "16GB", 2: "16GB", 3: "16GB"} #max memory falls benötigt und andere GPUs in Nutzung
                                             # text_encoder_2 = text_encoder
                                             )
