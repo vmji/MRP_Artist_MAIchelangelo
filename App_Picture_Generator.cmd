@@ -1,16 +1,33 @@
 @echo off
 setlocal enabledelayedexpansion
 chcp 65001
-set /p USERNAME="Enter your username: "
-echo '%USERNAME%'
+
+:: Load variables from .env file
+if exist ".env" (
+    for /f "usebackq delims=" %%L in (".env") do (
+        set "line=%%L"
+        rem Skip comments and empty lines
+        if not "!line:~0,1!"=="#" if defined line (
+            for /f "tokens=1,* delims==" %%A in ("!line!") do (
+                set "%%A=%%B"
+            )
+        )
+    )
+)
+
+:: Nutzen username aus .env oder Abfrage wenn dieser nicht festgelegt ist
+if not defined USERNAME (
+    set /p USERNAME= "Enter your username: " 
+) 
+echo 'Welcome %USERNAME%!'
 set REMOTE_DIR=/mount/point/%USERNAME%/input_images
 
 echo Uploaded images will be stored in '%REMOTE_DIR%'
 
-call ssh %USERNAME%@10.246.58.13 "mkdir -p %REMOTE_DIR%; cd %REMOTE_DIR%/; rm -rf *.png; rm -rf *.img; exit"
+call ssh %USERNAME%@%MRP_IP% "mkdir -p %REMOTE_DIR%; cd %REMOTE_DIR%/; rm -rf *.png; rm -rf *.img; exit"
 
 :ask
-set /p UPLOAD_FILES="Do you want to upload image files for editing from your local machine? (Y/n) "
+set /p UPLOAD_FILES="Do you want to upload image files for editing from your local machine? (Y/n): "
 if /i "%UPLOAD_FILES%"=="n" goto end
 if /i not "%UPLOAD_FILES%"=="Y" goto end
 
@@ -57,7 +74,7 @@ if !VALID_EXT!==0 (
 )
 
 echo "Copying data from: !FILE_PATH_FROM! to:%REMOTE_DIR%/"
-scp "!FILE_PATH_FROM!" %USERNAME%@10.246.58.13:%REMOTE_DIR%/
+scp "!FILE_PATH_FROM!" %USERNAME%@%MRP_IP%:%REMOTE_DIR%/
 goto loop
 :end
 
@@ -66,8 +83,8 @@ mkdir "C:\Users\Public\Pictures\MAIchelangelo" 2>nul
 set OUTPUT_DIR=/mount/point/%USERNAME%/generated_pictures/
 echo Generated images will be downloaded from %OUTPUT_DIR%
 
-ssh %USERNAME%@10.246.58.13 "mkdir -p %OUTPUT_DIR%; cd %OUTPUT_DIR%; rm -rf *.png; /mount/point/veith/.venv/bin/python /mount/point/veith/MRP_Artist_MAIchelangelo/Picture_Generator.py  %REMOTE_DIR% %OUTPUT_DIR%"
-scp -r "%USERNAME%@10.246.58.13:%OUTPUT_DIR%*.png" "C:\Users\Public\Pictures\MAIchelangelo"
+ssh %USERNAME%@%MRP_IP% "mkdir -p %OUTPUT_DIR%; cd %OUTPUT_DIR%; rm -rf *.png; /mount/point/veith/.venv/bin/python /mount/point/veith/MRP_Artist_MAIchelangelo/Picture_Generator.py  %REMOTE_DIR% %OUTPUT_DIR%"
+scp -r "%USERNAME%@%MRP_IP%:%OUTPUT_DIR%*.png" "C:\Users\Public\Pictures\MAIchelangelo"
 "Image(s) saved to C:\Users\Public\Pictures"
 setlocal enabledelayedexpansion
 for %%f in (C:\Users\Public\Pictures\MAIchelangelo\*.png) do ("%%f")
